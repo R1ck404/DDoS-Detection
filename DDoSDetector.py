@@ -15,8 +15,8 @@ ch.setFormatter(formatter)
 # Add the handler to the logger
 logger.addHandler(ch)
 
-# Set threshold for the time the program should pause
-sleep_threshold = 60
+# Set interval for when the program should check
+sleep_interval = 60
 
 # Set threshold for number of connections
 connection_threshold = 1000
@@ -45,4 +45,4 @@ while True:
         logger.debug('Connections are normal [c=' + format(connections) + ']')
 
     # Check again in the entered amount of seconds
-    time.sleep(sleep_threshold)
+    time.sleep(sleep_interval)
