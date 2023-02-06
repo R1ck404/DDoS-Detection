@@ -1,4 +1,4 @@
-import os, statistics, time, logging
+import os, statistics, time, logging, re
 
 # Set up the logger
 logger = logging.getLogger('attack_detector')
@@ -16,7 +16,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 # Set interval for when the program should check
-sleep_interval = 60
+sleep_interval = 15
 
 # Set threshold for number of connections
 connection_threshold = 1000
@@ -30,19 +30,21 @@ while True:
     connections = int(result.strip())
     previous_connections.append(connections)
 
+    os.system('title DDoS Attack Detector : Connnections: {}'.format(str(connections)))
     # Use statistical analysis to determine if the network activity is abnormal
-    if len(previous_connections) > 10:
-        previous_connections.pop(0)
+    if len(previous_connections) >= 10:
         mean = statistics.mean(previous_connections)
-        stddev = statistics.stddev(previous_connections)
+        stddev = statistics.stdev(previous_connections)
 
-        # Send an warning if the number of connections is above the threshold and significantly higher than average
+        # Send a warning if the number of connections is above the threshold and significantly higher than average
         if connections > connection_threshold and connections > (mean + 2 * stddev):
             logger.warning('Potential DDoS Attack [c=' + format(connections) + ']')
+            previous_connections = []
         else:
-            logger.debug('Abnormal connection amount [c=' + format(connections) + ']')
+            logger.debug('Connections are normal [c=' + format(connections) + ']')
+            previous_connections.pop(0)
     else:
-        logger.debug('Connections are normal [c=' + format(connections) + ']')
+        logger.debug('Not enough data to determine normal connection amount [c=' + format(connections) + ']')
 
     # Check again in the entered amount of seconds
     time.sleep(sleep_interval)
