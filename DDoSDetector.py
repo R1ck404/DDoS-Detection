@@ -15,6 +15,9 @@ ch.setFormatter(formatter)
 # Add the handler to the logger
 logger.addHandler(ch)
 
+#Should the suspected attacker blocked?
+block_attacker = False
+
 # Set interval for when the program should check
 sleep_interval = 15
 
@@ -39,7 +42,19 @@ while True:
 
         # Send a warning if the number of connections is above the threshold and significantly higher than average
         if connections > connection_threshold and connections > (mean + 2 * stddev):
-            logger.warning('Potential DDoS Attack [c=' + format(connections) + ']')
+            attacker = None
+            with os.popen("netstat -an | FindStr /R /C:\":80 \"") as result:
+                for line in result:
+                    match = re.search(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', line)
+                    if match:
+                        attacker = match.group()
+                        break
+
+            logger.warning('Potential DDoS Attack [c=' + format(connections) + '] [attacker=' + attacker + ']')
+
+            if block_attacker:
+                os.system(f'netsh advfirewall firewall add rule name="Block IP" dir=in action=block remoteip={attacker}')
+                
             previous_connections = []
         else:
             logger.debug('Connections are normal [c=' + format(connections) + ']')
