@@ -31,6 +31,7 @@ while True:
     previous_connections.append(connections)
 
     os.system('title DDoS Attack Detector : Connnections: {}'.format(str(connections)))
+    
     # Use statistical analysis to determine if the network activity is abnormal
     if len(previous_connections) >= 10:
         mean = statistics.mean(previous_connections)
